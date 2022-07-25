@@ -8,7 +8,7 @@
             <div class="card-body">
               <div class="row">
                 <div class="col">
-                  <h5 class="card-title text-uppercase text-muted mb-0">Cosine Similarity</h5>
+                  <h5 class="card-title text-uppercase text-muted mb-0">Jaro-Winkler</h5>
                   <span class="h2 font-weight-bold mb-0">>= %80</span>
                 </div>
                 <div class="col-auto">
@@ -28,8 +28,8 @@
             <div class="card-body">
               <div class="row">
                 <div class="col">
-                  <h5 class="card-title text-uppercase text-muted mb-0">Algoritmalar</h5>
-                  <span class="h2 font-weight-bold mb-0">6</span>
+                  <h5 class="card-title text-uppercase text-muted mb-0">Soru Tipi</h5>
+                  <span class="h2 font-weight-bold mb-0">11</span>
                 </div>
                 <div class="col-auto">
                   <div class="icon icon-shape bg-warning text-white rounded-circle shadow">
@@ -48,7 +48,7 @@
             <div class="card-body">
               <div class="row">
                 <div class="col">
-                  <h5 class="card-title text-uppercase text-muted mb-0">Class</h5>
+                  <h5 class="card-title text-uppercase text-muted mb-0">Kategori</h5>
                   <span class="h2 font-weight-bold mb-0">5</span>
                 </div>
                 <div class="col-auto">
@@ -68,8 +68,8 @@
             <div class="card-body">
               <div class="row">
                 <div class="col">
-                  <h5 class="card-title text-uppercase text-muted mb-0">Accuracy</h5>
-                  <span class="h2 font-weight-bold mb-0">95%</span>
+                  <h5 class="card-title text-uppercase text-muted mb-0">Dil</h5>
+                  <span class="h2 font-weight-bold mb-0">4</span>
                 </div>
                 <div class="col-auto">
                   <div class="icon icon-shape bg-info text-white rounded-circle shadow">
@@ -97,15 +97,22 @@
         <div class="card-header bg-transparent">
           <div class="row align-items-center">
             <div class="col">
-              <h2 class="mb-0">Sınıflar (Classes)</h2>
+              <h2 class="mb-0">Çalışma Döngüsü</h2>
             </div>
           </div>
         </div>
         <div class="card-body">
           <!-- Chart -->
-          <div class="chart">
-            <canvas id="chart-orders" class="chart-canvas"></canvas>
-          </div>
+          <h4>Adım 1: Kullanıcı tarafından bir mesaj girilecektir.</h4>
+          <h4>Adım 2: Sistem kullanıcıdan aldığı mesaj üzerinde dil algılama algoritmasını uygulayacaktır.</h4>
+          <h4>Adım 3: Algılanan dil üzerinde, Türkçe diline çeviri gerçekleştiren algoritma uygulanacakdır.</h4>
+          <h4>Adım 4: Mesaj üzerinde açılış ya da kapanış metni olma durumunu sorgulayan Jaro-Winkler algoritması uygulanacakdır.</h4>
+          <h4>Adım 5: Mesaj üzerinde Jaro-Winkler algoritmasının benzerlik oranı %80 üzerinde ise açılış ya da kapanış metni cevap olarak dönülecektir.</h4>
+          <h4>Adım 6: Mesaj üzerinde Jaro-Winkler algoritmasının benzerlik oranı %80 altında ise metin, kural tabanı ile yola devam edecektir</h4>
+          <h4>Adım 7: Sistemde kayıtlı olan 9 adet anahtar kelime veri seti içerisindeki anahtar kelimeler dolaşılacaktır.</h4>
+          <h4>Adım 8: Anahtar kelimeleri mesaj içerisinde bulunan veri seti tahmin edilen veri seti olarak kabul edilecektir.</h4>
+          <h4>Adım 9: Bulunan veri setine göre sistemde kayıtlı 4 farklı soru-cevap veri seti içerisinden birisi üzerinde cevap metni sorgulanacaktır.</h4>
+          <h4>Adım 10: Cevap metni ekrana çıktı olarak basılacaktır.</h4>
         </div>
       </div>
     </div>

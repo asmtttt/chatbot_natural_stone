@@ -5,7 +5,7 @@ from pydantic import BaseModel
 from a2wsgi import ASGIMiddleware
 from .rule_base import *
 
-app = FastAPI(title="Caretta Chatbot")
+app = FastAPI(title="Chatbot Natural Stone")
 
 # for ASGI Handler
 wsgi_app = ASGIMiddleware(app)
@@ -24,118 +24,221 @@ app.add_middleware(
 async def read_root() -> dict:
     return {"message": "Welcome to chatbot app!."}
 
-# for machine learning
-model = None
-vector = load("app/joblibsAndDB/count_vect.joblib")
 
-# for machine learning
 class get_review(BaseModel):
     review: str
 
-# for machine learning (selecting algorithm)
-@app.get("/algorithm/{algorithm}")
-async def get_algorithm(algorithm: int):
-    print(algorithm, "algorithm")
-    global model
-    algorithmValues = [
-        {"value": 1, "file": "lr_model.joblib"},
-        {"value": 2, "file": "svm_model.joblib"},
-        {"value": 3, "file": "nb_model.joblib"},
-        {"value": 4, "file": "random_forrest_model.joblib"},
-        {"value": 5, "file": "decision_tree_model.joblib"},
-        {"value": 6, "file": "mlp_model.joblib"}
-    ]
 
-    for item in algorithmValues:
-        if algorithm == item["value"]:
-            model = load("app/joblibsAndDB/" + item["file"])
-            break
+@app.post("/answer", response_description="Answer of question.")
+async def get_answer(gr: get_review):
+    languages = convert_txt_to_list("app/languages/language.txt")
+    greeting_dataset = pd.read_excel("app/keyword_datasets/Chatbot_Greeting_Dataset.xlsx")
+    bye_dataset = pd.read_excel("app/keyword_datasets/Chatbot_Bye_Dataset.xlsx")
 
-# for machine learning
-"""@app.post("/prediction", response_description="Prediction of text.")
-async def get_prediction(gr: get_review):
-    text = [gr.review]
-    vec = vector.transform(text)
-    print(model, "model")
-    prediction = model.predict(vec)
-    print("predict: ", prediction)
+    sifa_dataset = pd.read_excel("app/keyword_datasets/sifa.xlsx")
+    cinsiyet_dataset = pd.read_excel("app/keyword_datasets/cinsiyet.xlsx")
+    burc_dataset = pd.read_excel("app/keyword_datasets/burc.xlsx")
+    bakim_dataset = pd.read_excel("app/keyword_datasets/bakim.xlsx")
+    kullanim_dataset = pd.read_excel("app/keyword_datasets/kullanim.xlsx")
+    sertifika_orijinal_dataset = pd.read_excel("app/keyword_datasets/sertifika_orijinal.xlsx")
+    dataset_by_stone = pd.read_excel("app/answers_datasets/dataset_by_stone.xlsx")
 
-    prediction_object = {"prediction_id": 0, "sentence": gr.review, "prediction": prediction[0], "answer": ""}
-    predictionsList = ["kargo", "fiyat", "ozellik"]
+    hastalik_dataset = pd.read_excel("app/keyword_datasets/hastalik.xlsx")
+    dataset_by_disease = pd.read_excel("app/answers_datasets/dataset_by_disease.xlsx")
 
-    for index, item in enumerate(predictionsList):
-        if prediction[0] == item:
-            prediction_object["prediction_id"] = index + 1
-            break
-    
-    return prediction_object"""
+    birthday_zodiac_dataset = pd.read_excel("app/keyword_datasets/birthday_zodiac.xlsx")
+    dataset_by_zodiac = pd.read_excel("app/answers_datasets/dataset_by_zodiac.xlsx")
 
-# for machine learning
-@app.post("/prediction", response_description="Prediction of text.")
-async def get_prediction(gr: get_review):
-    greeting_dataset = pd.read_excel("app/joblibsAndDB/Chatbot_Greeting_Dataset.xlsx")
-    bye_dataset = pd.read_excel("app/joblibsAndDB/Chatbot_Bye_Dataset.xlsx")
-    
-    text = gr.review
-    text = convert_to_lowercase(text)
+    urun_sorgu_dataset = pd.read_excel("app/keyword_datasets/urun_sorgu.xlsx")
+    dataset_by_product_query = pd.read_excel("app/answers_datasets/dataset_by_product_query.xlsx")
 
-    """print("öncesi:", text)
-    text = autocorrect_turkish(text)
-    print("sonrası:", text)"""
 
-    result = is_greet_or_bye(text, greeting_dataset, bye_dataset)
+    message = gr.review
 
-    print("resultum:", result)
+    #size_languages_list = len(languages)
+    this_language_message = lang_detect(message).lang
 
-    greetbyeAnswer = {"answer": ""}
+    all_answer = {"answer": ""}
 
-    if result == 1:
-        answer = answer_greet_or_bye("greeting")
-        print("merhabanın cevabı:", answer)
-        print("merhabanın taypı:", type(answer))
-        greetbyeAnswer["answer"] = answer
-        print(greetbyeAnswer)
+    if this_language_message in languages:
+        if this_language_message == "tr":
+            label = is_greet_or_bye(message, greeting_dataset, bye_dataset, "Question", 0.80)
+            if label == 1:
+                answer = answer_greet_or_bye("greeting")
+                all_answer["answer"] = answer
+                print(all_answer)
+                return all_answer
 
-        return greetbyeAnswer
+            if label == 0:
+                answer = answer_greet_or_bye("bye")
+                all_answer["answer"] = answer
+                print(all_answer)
+                return all_answer
 
-    if result == 0:
-        answer = answer_greet_or_bye("bye")
-        greetbyeAnswer["answer"] = answer
-        print(greetbyeAnswer)
+            if label == -1:
+                message = convert_to_lowercase(message)
 
-        return greetbyeAnswer
-    
-    if result == -1:
-        text = [text]
-        vec = vector.transform(text)
-        print(model, "model")
-        prediction = model.predict(vec)
-        print("predict: ", prediction)
+                keywords_stone_datasets_list = [sifa_dataset, cinsiyet_dataset, burc_dataset,
+                                                bakim_dataset, kullanim_dataset, sertifika_orijinal_dataset]
+                answer_by_stone_column_list = list(dataset_by_stone.columns)
+                answer_by_stone_column_list.pop(0)
+                # print(answer_column_list)
+                answer = answer_by_stone(message, keywords_stone_datasets_list, dataset_by_stone, "stone",
+                                         answer_by_stone_column_list)
 
-        prediction_object = {"prediction_id": 0, "sentence": text[0], "prediction": prediction[0], "answer": ""}
-        predictionsList = ["kargo", "fiyat", "ozellik"]
+                if answer != False:
+                    all_answer["answer"] = answer
+                    print(all_answer)
+                    return all_answer
 
-        for index, item in enumerate(predictionsList):
-            if prediction[0] == item:
-                prediction_object["prediction_id"] = index + 1
-                break
-        
-        if prediction_object["prediction"] == "kargo":
-            answer = answer_logistic(autocorrect_turkish(prediction_object["sentence"]))
-            prediction_object["answer"] = answer
+                else:
+                    keywords_disease_datasets_list = [hastalik_dataset]
+                    answer_by_disease_column_list = list(dataset_by_disease.columns)
+                    answer_by_disease_column_list.pop(0)
+                    answer = answer_by_disease(message, keywords_disease_datasets_list, dataset_by_disease, "disease",
+                                               answer_by_disease_column_list)
 
-        if prediction_object["prediction"] == "fiyat":
-            answer = answer_price1(prediction_object["sentence"])
-            #answer_not_stocks = print_answer1_data(answer)
-            if answer == "product_in_not_stocks":
-                prediction_object["answer"] = "Maalesef stoklarımızda aradığınız kriterlere uygun bir ürün bulunmamaktadır.\nLütfen daha kolay anlayabilmem için mesajınızı, yazdığınız metnin doğruluğundan emin olarak giriniz :)"
-            else:
-                prediction_object["answer"] = answer
-        
-        if prediction_object["prediction"] == "ozellik":
-            answer = answer_properties(prediction_object["sentence"])
-            prediction_object["answer"] = answer
+                    if answer != False:
+                        text = "Aramış olduğunuz hastalığa iyi gelecek olan taşlar: "
+                        answer = text + answer
+                        all_answer["answer"] = answer
+                        print(all_answer)
+                        return all_answer
 
-        print(prediction_object)
-        
-        return prediction_object
+                    else:
+                        keywords_zodiac_datasets_list = [birthday_zodiac_dataset]
+                        answer_by_zodiac_column_list = list(dataset_by_zodiac.columns)
+                        answer_by_zodiac_column_list.pop(0)
+                        answer = answer_by_zodiac(message, keywords_zodiac_datasets_list, dataset_by_zodiac,
+                                                  "birthday_zodiac", answer_by_zodiac_column_list)
+
+                        if answer != False:
+                            text = "Belirtmiş olduğunuz burca uygun taşlar: "
+                            answer = text + answer
+                            all_answer["answer"] = answer
+                            print(all_answer)
+                            return all_answer
+
+                        else:
+                            keywords_product_query_datasets_list = [urun_sorgu_dataset]
+                            answer_by_product_query_column_list = list(dataset_by_product_query.columns)
+                            answer_by_product_query_column_list.pop(0)
+                            answer = answer_by_product_query(message, keywords_product_query_datasets_list,
+                                                             dataset_by_product_query, "stone",
+                                                             answer_by_product_query_column_list)
+                            # suan buradasin unutma
+
+                            if answer != False:
+                                all_answer["answer"] = answer
+                                print(all_answer)
+                                return all_answer
+
+                            else:
+                                answer = "Maalesef mesajınızı algılayamadım"
+                                all_answer["answer"] = answer
+                                print(all_answer)
+                                return all_answer
+
+        else:
+            turkish_message = translator(message, this_language_message, "tr")
+            turkish_message = convert_to_lowercase(turkish_message)
+            print('Orijinal Mesaj: ', message)
+            print('Çevrilen Mesaj: ', turkish_message)
+            label = is_greet_or_bye(turkish_message, greeting_dataset, bye_dataset, "Question", 0.80)
+
+            if label == 1:
+                answer_message = answer_greet_or_bye("greeting")
+                orginal_language_message = translator(answer_message, "tr", this_language_message)
+                orginal_language_message = orginal_language_message.capitalize()
+                all_answer["answer"] = orginal_language_message
+                print(all_answer)
+                return all_answer
+
+            if label == 0:
+                answer_message = answer_greet_or_bye("bye")
+                orginal_language_message = translator(answer_message, "tr", this_language_message)
+                orginal_language_message = orginal_language_message.capitalize()
+                all_answer["answer"] = orginal_language_message
+                print(all_answer)
+                return all_answer
+
+
+            if label == -1:
+                keywords_datasets_list = [sifa_dataset, cinsiyet_dataset, burc_dataset,
+                                          bakim_dataset, kullanim_dataset, sertifika_orijinal_dataset]
+                answer_column_list = dataset_by_stone.columns
+                answer_column_list = list(dataset_by_stone.columns)
+                answer_column_list.pop(0)
+                answer = answer_by_stone(turkish_message, keywords_datasets_list, dataset_by_stone, "stone",
+                                         answer_column_list)
+
+                if answer != False:
+                    orginal_language_message = translator(answer, "tr", this_language_message)
+                    orginal_language_message = orginal_language_message.capitalize()
+                    all_answer["answer"] = orginal_language_message
+                    print(all_answer)
+                    return all_answer
+
+                else:
+                    keywords_disease_datasets_list = [hastalik_dataset]
+                    answer_by_disease_column_list = list(dataset_by_disease.columns)
+                    answer_by_disease_column_list.pop(0)
+                    answer = answer_by_disease(turkish_message, keywords_disease_datasets_list, dataset_by_disease,
+                                               "disease", answer_by_disease_column_list)
+
+                    if answer != False:
+                        text = "Aramış olduğunuz hastalığa iyi gelecek olan taşlar: "
+                        answer = text + answer
+                        orginal_language_message = translator(answer, "tr", this_language_message)
+                        orginal_language_message = orginal_language_message.capitalize()
+                        all_answer["answer"] = orginal_language_message
+                        print(all_answer)
+                        return all_answer
+
+                    else:
+                        keywords_zodiac_datasets_list = [birthday_zodiac_dataset]
+                        answer_by_zodiac_column_list = list(dataset_by_zodiac.columns)
+                        answer_by_zodiac_column_list.pop(0)
+                        answer = answer_by_zodiac(turkish_message, keywords_zodiac_datasets_list, dataset_by_zodiac,
+                                                  "birthday_zodiac", answer_by_zodiac_column_list)
+
+                        if answer != False:
+                            text = "Belirtmiş olduğunuz burca uygun taşlar: "
+                            answer = text + answer
+                            orginal_language_message = translator(answer, "tr", this_language_message)
+                            orginal_language_message = orginal_language_message.capitalize()
+                            all_answer["answer"] = orginal_language_message
+                            print(all_answer)
+                            return all_answer
+
+                        else:
+                            keywords_product_query_datasets_list = [urun_sorgu_dataset]
+                            answer_by_product_query_column_list = list(dataset_by_product_query.columns)
+                            answer_by_product_query_column_list.pop(0)
+                            answer = answer_by_product_query(turkish_message, keywords_product_query_datasets_list,
+                                                             dataset_by_product_query, "stone",
+                                                             answer_by_product_query_column_list)
+                            # suan buradasin unutma
+
+                            if answer != False:
+                                orginal_language_message = translator(answer, "tr", this_language_message)
+                                orginal_language_message = orginal_language_message.capitalize()
+                                all_answer["answer"] = orginal_language_message
+                                print(all_answer)
+                                return all_answer
+
+                            else:
+                                answer = "Maalesef mesajınızı algılayamadım"
+                                orginal_language_message = translator(answer, "tr", this_language_message)
+                                orginal_language_message = orginal_language_message.capitalize()
+                                all_answer["answer"] = orginal_language_message
+                                print(all_answer)
+                                return all_answer
+
+    else:
+        answer = "Maalesef dilinizi algılayamıyorum!"
+        orginal_language_message = translator(answer, "tr", "en")
+        answer = "Türkçe: " + answer + " \n" + "English: " + orginal_language_message
+        all_answer["answer"] = orginal_language_message
+        print(all_answer)
+        return all_answer

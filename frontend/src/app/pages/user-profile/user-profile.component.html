@@ -14,7 +14,7 @@
         <div class="card-header bg-white border-0">
           <div class="row align-items-center">
             <div class="col-8">
-              <h3 class="mb-0">Sınıflandırma Algoritmaları ile Chatbot Uygulaması</h3>
+              <h2 class="mb-0">Kural Tabanlı Chatbot Uygulaması</h2>
             </div>
           </div>
         </div>
@@ -22,18 +22,7 @@
           <form [formGroup]="predictionForm" (ngSubmit)="predictionFormOnSubmit()">
             <div class="row">
               <div class="col-12">
-                <div class="form-group row">
-                  <div class="col-6">
-                    <label for="algorithm">Algoritma</label>
-                    <select class="form-control" formControlName="algorithm" id="algorithm" (change)="changeAlgorithm()">
-                      <option *ngFor="let algorithm of algorithms" [ngValue]="algorithm.value">{{algorithm.name}}</option>
-                    </select>
-                  </div>
-                  <div class="col-6">
-                    <label for="accuracy">Accuracy</label>
-                    <p class="font-weight-bold">{{algorithmAccuracy}}</p>
-                  </div>
-                </div>
+
                 <div class="form-group">
                   <label for="text-for-prediction">Mesaj İçeriği</label>
                   <textarea id="text-for-prediction" rows="4" class="form-control form-control-alternative"
