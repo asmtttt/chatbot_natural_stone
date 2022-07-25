@@ -1,0 +1,54 @@
+<div class="header pb-8 pt-5 pt-lg-8 d-flex align-items-center">
+  <!-- Mask -->
+  <span class="mask bg-gradient-caretta-green opacity-8"></span>
+  <!-- Header container -->
+  <div class="container-fluid d-flex align-items-center">
+
+  </div>
+</div>
+<div class="container-fluid mt--7">
+  <div class="row">
+
+    <div class="col-12 order-1">
+      <div class="card bg-secondary shadow">
+        <div class="card-header bg-white border-0">
+          <div class="row align-items-center">
+            <div class="col-8">
+              <h2 class="mb-0">Kural Tabanlı Chatbot Uygulaması</h2>
+            </div>
+          </div>
+        </div>
+        <div class="card-body">
+          <form [formGroup]="predictionForm" (ngSubmit)="predictionFormOnSubmit()">
+            <div class="row">
+              <div class="col-12">
+
+                <div class="form-group">
+                  <label for="text-for-prediction">Mesaj İçeriği</label>
+                  <textarea id="text-for-prediction" rows="4" class="form-control form-control-alternative"
+                    placeholder="Metin giriniz..." formControlName="textForPrediction"></textarea>
+                </div>
+                <div class="d-flex justify-content-end">
+                  <button id="prediction-button" class="btn" type="submit">Yanıt</button>
+                </div>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-12 mt-5 d-flex justify-content-center align-items-center" id="prediction-result">
+                <div class="text-center">
+                  <h2>Chat</h2>
+                  <div *ngIf="!predictionResultIsString">
+                    <p *ngFor="let result of predictionResult" class="font-weight-bold">{{result}}</p>
+                  </div>
+                  <div *ngIf="predictionResultIsString">
+                    <p class="font-weight-bold">{{predictionResult}}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
