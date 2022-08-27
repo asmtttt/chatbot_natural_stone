@@ -1,0 +1,24 @@
+<div id="general-div">
+    <div id="img-div">
+        <img src=".\assets\img\theme\avatar-close.jpeg" alt="avatar-close-mouth" width="350" height="400">
+    </div>
+    <div id="lang-div" class="col-6">
+        <label for="category">Dil Seç</label>
+        <select
+          [(ngModel)]="req.language"
+          id="language"
+          class="form-control"
+          (change)="onLanguageChange($event)"
+        >
+          <option *ngFor="let l of languages" [ngValue]="l">
+            {{ l }}
+          </option>
+        </select>
+    </div>
+    <div id="buttons-div">
+        <button style="margin: 10px;" (click)="startService()">Start</button>
+        <button style="margin: 10px;" (click)="stopService()">Stop</button>
+    </div>
+    <!-- <p>{{text}}</p> -->
+    <p id="predict-result" style="text-align: center;">{{predictionResult}}</p>
+</div>

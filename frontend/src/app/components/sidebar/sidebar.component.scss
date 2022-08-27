@@ -1,0 +1,11 @@
+.navbar-nav {
+    i {
+        color: rgb(0, 0, 0);
+    }
+}
+
+@media (min-width: 768px) {
+    .navbar-vertical.navbar-expand-md .navbar-brand-img {
+        max-height: 100%;
+    }
+}
