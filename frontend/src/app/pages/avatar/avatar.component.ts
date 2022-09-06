@@ -25,6 +25,8 @@ export class AvatarComponent implements OnInit {
   public languages = ["Türkçe", "İngilizce", "İspanyolca", "Fransızca"];
   public languagesCode = ["tr", "en-US", "es-ES", "fr-FR"];
 
+  is_open_microphone: boolean = false;
+
   req = {
     language: "Türkçe",
     languageCode: "tr"
@@ -159,14 +161,16 @@ export class AvatarComponent implements OnInit {
 
   startService() {
     this.start();
+    this.is_open_microphone = true;
     console.log("mylang: ", this.recognition.lang);
   }
 
   stopService() {
-    setTimeout(() => {
-      this.stop();
-      this.speechToTextAnswer();
-    },
+    this.is_open_microphone = false;
+    setTimeout(() => 
+      {
+        this.stop();
+        this.speechToTextAnswer();},
       2000);
   }
 

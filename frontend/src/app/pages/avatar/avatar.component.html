@@ -2,6 +2,7 @@
     <div id="img-div">
     </div>
     <div id="lang-div" class="col-6">
+      <br>
         <label for="category">Dil Seç</label>
         <select
           [(ngModel)]="req.language"
@@ -15,8 +16,24 @@
         </select>
     </div>
     <div id="buttons-div">
-        <button style="margin: 10px;" (click)="startService()">Start</button>
-        <button style="margin: 10px;" (click)="stopService()">Stop</button>
+        <button 
+          title="Mikrofonu Aç"
+          *ngIf="is_open_microphone == false" 
+          id="button-start" 
+          style="margin: 10px;" 
+          (click)="startService()">
+          <i class="fa fa-microphone"></i>
+          
+        </button>
+
+        <button 
+          title="Mikrofonu Kapat"
+          *ngIf="is_open_microphone == true" 
+          id="button-stop" 
+          style="margin: 10px;" 
+          (click)="stopService()">
+          <i class="fa fa-microphone-slash"></i>
+        </button>
     </div>
     <!-- <p>{{text}}</p> -->
     <p id="predict-result" style="text-align: center;">{{predictionResult}}</p>

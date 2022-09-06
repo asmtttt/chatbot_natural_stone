@@ -9,9 +9,47 @@ body {
 
 #lang-div {
     text-align: center;
+    width: 350;
     margin: 0 auto;
+    
+}
+
+.form-control {
+    cursor: pointer;
 }
 
 #img-div {
     height: 350px;
+}
+
+#button-start {
+    border-radius: 70%;
+    border-color: transparent;
+    background-color: white;
+    color: green;
+    font-size: 25px;
+}
+
+#button-start:hover {
+    border-radius: 70%;
+    border-color: transparent;
+    background-color: green;
+    color: white;
+    font-size: 25px;
+}
+
+#button-stop {
+    border-radius: 50%;
+    border-color: transparent;
+    background-color: white;
+    color: red;
+    font-size: 25px;
+}
+
+#button-stop:hover {
+    border-radius: 50%;
+    border-color: transparent;
+    background-color: red;
+    color: white;
+    font-size: 25px;
 }
