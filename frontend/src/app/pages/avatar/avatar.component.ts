@@ -1,11 +1,13 @@
 import { Component, OnInit } from '@angular/core';
 import { VoiceRecognitionService } from 'src/app/services/voice-recognition.service';
 import { compileClassMetadata } from '@angular/compiler';
-import { Injectable } from '@angular/core';
 import { ApiService } from 'src/app/services/api.service';
 import { SelectMultipleControlValueAccessor } from '@angular/forms';
 
 declare var webkitSpeechRecognition: any;
+declare var SDK: any;
+declare var SDKConnection: any;
+declare var WebAvatar: any;
 
 @Component({
   selector: 'app-avatar',
@@ -32,21 +34,15 @@ export class AvatarComponent implements OnInit {
 
   predictionResult: string;
   predictionResultIsString: boolean;
-  
+
+  avatarSDK: any;
+  webAvatar: any;
+
   constructor(private apiService: ApiService) {
+    
   }
 
-  getTranscriptValue() {
-    return this.transcript_arr;
-  }
-
-  getConfidenceValue() {
-    return this.confidence_arr;
-  }
-
-  ngOnInit(){
-    //console.log("mylang: ", this.comp.req.languageCode);
-
+  ngOnInit() {
     this.recognition.continuous = true;
     this.recognition.interimResults = false;
     this.recognition.maxAlternatives = 1;
@@ -65,6 +61,43 @@ export class AvatarComponent implements OnInit {
         .join('');
       this.tempWords = transcript;
     });
+
+    this.initAvatarSDK();
+  }
+
+  initAvatarSDK() {
+    SDK.applicationId = "6105974131766205942";
+    SDK.body = function () {
+      var body = document.getElementById("img-div");
+      return body;
+    };
+
+    this.avatarSDK = new SDKConnection();
+    this.webAvatar = new WebAvatar();
+    
+    this.webAvatar.version = 8.5;
+    this.webAvatar.connection = this.avatarSDK;
+    this.webAvatar.avatar = "13974700";
+    this.webAvatar.voice = "dfki-ot";
+    this.webAvatar.voiceMod = "default";
+    this.webAvatar.width = "350";
+
+    this.webAvatar.createBox();
+    this.textToSpeechAvatar("selam nasılsın hoş geldin");
+  }
+
+  textToSpeechAvatar(text: string) {
+    console.log("textToSpeechAvatar");
+    this.webAvatar.addMessage(text, "", "", "");
+    this.webAvatar.processMessages();
+  }
+
+  getTranscriptValue() {
+    return this.transcript_arr;
+  }
+
+  getConfidenceValue() {
+    return this.confidence_arr;
   }
 
   speechToTextAnswer() {
@@ -79,11 +112,12 @@ export class AvatarComponent implements OnInit {
           this.predictionResultIsString = true
         else
           this.predictionResultIsString = false
-        
+
         console.log("apiservis içindeki answer: ", this.predictionResult);
+        this.textToSpeechAvatar(this.predictionResult);
       },
       error: error => {
-        
+
       }
     });
   }
@@ -140,7 +174,7 @@ export class AvatarComponent implements OnInit {
       2000);
   }
 
-  onLanguageChange(ev) { 
+  onLanguageChange(ev) {
     var index = this.languages.indexOf(this.req.language);
     this.req.languageCode = this.languagesCode[index];
     console.log("dil: ", this.req.language);
