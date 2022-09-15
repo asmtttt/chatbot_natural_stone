@@ -22,12 +22,15 @@ export class AvatarComponent implements OnInit {
   public tempWords: any;
   public transcript_arr = [];
   public confidence_arr = [];
-  public languages = ["Türkçe", "İngilizce", "İspanyolca", "Fransızca"];
-  public languagesCode = ["tr", "en-US", "es-ES", "fr-FR"];
+  public languages = [
+    { ID: 1, lang: "Türkçe", langCode: "tr", voiceName: "Microsoft Tolga - Turkish (Turkey)" }, 
+    { ID: 2, lang: "İngilizce", langCode: "en-US", voiceName: "Google UK English Male" }
+  ];
 
   is_open_microphone: boolean = false;
 
   req = {
+    langID: 1,
     language: "Türkçe",
     languageCode: "tr"
   }
@@ -78,8 +81,10 @@ export class AvatarComponent implements OnInit {
     this.webAvatar.version = 8.5;
     this.webAvatar.connection = this.avatarSDK;
     this.webAvatar.avatar = "13974700";
-    this.webAvatar.voice = "dfki-ot";
+    this.webAvatar.voice = "dfki-ot-hsmm";
     this.webAvatar.voiceMod = "default";
+    this.webAvatar.nativeVoice = true;
+    this.webAvatar.nativeVoiceName = this.languages[0].voiceName;
     this.webAvatar.width = "350";
 
     this.webAvatar.createBox();
@@ -117,7 +122,7 @@ export class AvatarComponent implements OnInit {
         this.textToSpeechAvatar(this.predictionResult);
       },
       error: error => {
-
+        this.textToSpeechAvatar("Hata verdi");
       }
     });
   }
@@ -174,14 +179,10 @@ export class AvatarComponent implements OnInit {
       2000);
   }
 
-  onLanguageChange(ev) {
-    var index = this.languages.indexOf(this.req.language);
-    this.req.languageCode = this.languagesCode[index];
-    console.log("dil: ", this.req.language);
-    console.log("dil kodu: ", this.req.languageCode);
-    this.recognition.lang = this.req.languageCode;
-    console.log("reclang: ", this.req.languageCode);
-
+  onLanguageChange(langID) {
+    this.recognition.lang = this.languages[langID - 1].langCode;
+    this.webAvatar.nativeVoiceName = this.languages[langID - 1].voiceName;
+    console.log("reclang: ", this.recognition.lang);
   }
 
 }

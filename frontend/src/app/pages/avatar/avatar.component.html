@@ -1,17 +1,17 @@
 <div id="general-div">
     <div id="img-div">
     </div>
-    <div id="lang-div" class="col-6">
+    <div id="lang-div" class="col-4">
       <br>
         <label for="category">Dil Seç</label>
         <select
-          [(ngModel)]="req.language"
+          [(ngModel)]="req.langID"
           id="language"
           class="form-control"
-          (change)="onLanguageChange($event)"
+          (change)="onLanguageChange($event.target.value)"
         >
-          <option *ngFor="let l of languages" [ngValue]="l">
-            {{ l }}
+          <option *ngFor="let l of languages" [value]="l.ID">
+            {{ l.lang }}
           </option>
         </select>
     </div>
