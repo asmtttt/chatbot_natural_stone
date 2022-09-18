@@ -88,7 +88,7 @@ export class AvatarComponent implements OnInit {
     this.webAvatar.width = "350";
 
     this.webAvatar.createBox();
-    this.textToSpeechAvatar("selam nasılsın hoş geldin");
+    this.textToSpeechAvatar("Merhaba hoş geldiniz!");
   }
 
   textToSpeechAvatar(text: string) {

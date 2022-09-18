@@ -8,9 +8,9 @@ declare interface RouteInfo {
     class: string;
 }
 export const ROUTES: RouteInfo[] = [
-    { path: '/dashboard', title: 'İstatistikler',  icon: 'ni-tv-2', class: '' },
-    { path: '/user-profile', title: 'Chatbot',  icon:'ni-bullet-list-67', class: '' },
-    { path: '/avatar', title: 'Avatar',  icon:'ni-bullet-list-67', class: '' },
+    { path: '/dashboard', title: 'İstatistikler',  icon: 'ni ni-chart-bar-32', class: '' },
+    { path: '/user-profile', title: 'Chatbot',  icon:'ni ni-chat-round', class: '' },
+    { path: '/avatar', title: 'Avatar',  icon:'ni ni-single-02', class: '' },
 ];
 
 @Component({
@@ -27,8 +27,8 @@ export class SidebarComponent implements OnInit {
 
   ngOnInit() {
     this.menuItems = ROUTES.filter(menuItem => menuItem);
-    this.router.events.subscribe((event) => {
-      this.isCollapsed = true;
-   });
+      this.router.events.subscribe((event) => {
+        this.isCollapsed = true;
+     });
   }
 }

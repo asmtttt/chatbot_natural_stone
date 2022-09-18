@@ -31,26 +31,26 @@ class get_review(BaseModel):
 
 @app.post("/answer", response_description="Answer of question.")
 async def get_answer(gr: get_review):
-    languages = convert_txt_to_list("app/languages/language.txt")
-    greeting_dataset = pd.read_excel("app/keyword_datasets/Chatbot_Greeting_Dataset.xlsx")
-    bye_dataset = pd.read_excel("app/keyword_datasets/Chatbot_Bye_Dataset.xlsx")
+    languages = convert_txt_to_list("backend/app/languages/language.txt")
+    greeting_dataset = pd.read_excel("backend/app/keyword_datasets/Chatbot_Greeting_Dataset.xlsx")
+    bye_dataset = pd.read_excel("backend/app/keyword_datasets/Chatbot_Bye_Dataset.xlsx")
 
-    sifa_dataset = pd.read_excel("app/keyword_datasets/sifa.xlsx")
-    cinsiyet_dataset = pd.read_excel("app/keyword_datasets/cinsiyet.xlsx")
-    burc_dataset = pd.read_excel("app/keyword_datasets/burc.xlsx")
-    bakim_dataset = pd.read_excel("app/keyword_datasets/bakim.xlsx")
-    kullanim_dataset = pd.read_excel("app/keyword_datasets/kullanim.xlsx")
-    sertifika_orijinal_dataset = pd.read_excel("app/keyword_datasets/sertifika_orijinal.xlsx")
-    dataset_by_stone = pd.read_excel("app/answers_datasets/dataset_by_stone.xlsx")
+    sifa_dataset = pd.read_excel("backend/app/keyword_datasets/sifa.xlsx")
+    cinsiyet_dataset = pd.read_excel("backend/app/keyword_datasets/cinsiyet.xlsx")
+    burc_dataset = pd.read_excel("backend/app/keyword_datasets/burc.xlsx")
+    bakim_dataset = pd.read_excel("backend/app/keyword_datasets/bakim.xlsx")
+    kullanim_dataset = pd.read_excel("backend/app/keyword_datasets/kullanim.xlsx")
+    sertifika_orijinal_dataset = pd.read_excel("backend/app/keyword_datasets/sertifika_orijinal.xlsx")
+    dataset_by_stone = pd.read_excel("backend/app/answers_datasets/dataset_by_stone.xlsx")
 
-    hastalik_dataset = pd.read_excel("app/keyword_datasets/hastalik.xlsx")
-    dataset_by_disease = pd.read_excel("app/answers_datasets/dataset_by_disease.xlsx")
+    hastalik_dataset = pd.read_excel("backend/app/keyword_datasets/hastalik.xlsx")
+    dataset_by_disease = pd.read_excel("backend/app/answers_datasets/dataset_by_disease.xlsx")
 
-    birthday_zodiac_dataset = pd.read_excel("app/keyword_datasets/birthday_zodiac.xlsx")
-    dataset_by_zodiac = pd.read_excel("app/answers_datasets/dataset_by_zodiac.xlsx")
+    birthday_zodiac_dataset = pd.read_excel("backend/app/keyword_datasets/birthday_zodiac.xlsx")
+    dataset_by_zodiac = pd.read_excel("backend/app/answers_datasets/dataset_by_zodiac.xlsx")
 
-    urun_sorgu_dataset = pd.read_excel("app/keyword_datasets/urun_sorgu.xlsx")
-    dataset_by_product_query = pd.read_excel("app/answers_datasets/dataset_by_product_query.xlsx")
+    urun_sorgu_dataset = pd.read_excel("backend/app/keyword_datasets/urun_sorgu.xlsx")
+    dataset_by_product_query = pd.read_excel("backend/app/answers_datasets/dataset_by_product_query.xlsx")
 
 
     message = gr.review
@@ -174,7 +174,7 @@ async def get_answer(gr: get_review):
 
                 if answer != False:
                     orginal_language_message = translator(answer, "tr", this_language_message)
-                    orginal_language_message = orginal_language_message.capitalize()
+                    # orginal_language_message = orginal_language_message.capitalize()
                     all_answer["answer"] = orginal_language_message
                     print(all_answer)
                     return all_answer
@@ -190,7 +190,7 @@ async def get_answer(gr: get_review):
                         text = "Aramış olduğunuz hastalığa iyi gelecek olan taşlar: "
                         answer = text + answer
                         orginal_language_message = translator(answer, "tr", this_language_message)
-                        orginal_language_message = orginal_language_message.capitalize()
+                        # orginal_language_message = orginal_language_message.capitalize()
                         all_answer["answer"] = orginal_language_message
                         print(all_answer)
                         return all_answer
@@ -206,7 +206,7 @@ async def get_answer(gr: get_review):
                             text = "Belirtmiş olduğunuz burca uygun taşlar: "
                             answer = text + answer
                             orginal_language_message = translator(answer, "tr", this_language_message)
-                            orginal_language_message = orginal_language_message.capitalize()
+                            # orginal_language_message = orginal_language_message.capitalize()
                             all_answer["answer"] = orginal_language_message
                             print(all_answer)
                             return all_answer
@@ -218,11 +218,10 @@ async def get_answer(gr: get_review):
                             answer = answer_by_product_query(turkish_message, keywords_product_query_datasets_list,
                                                              dataset_by_product_query, "stone",
                                                              answer_by_product_query_column_list)
-                            # suan buradasin unutma
 
                             if answer != False:
                                 orginal_language_message = translator(answer, "tr", this_language_message)
-                                orginal_language_message = orginal_language_message.capitalize()
+                                #orginal_language_message = orginal_language_message.capitalize()
                                 all_answer["answer"] = orginal_language_message
                                 print(all_answer)
                                 return all_answer
