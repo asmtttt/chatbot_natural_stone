@@ -29,6 +29,7 @@ export class SidebarComponent implements OnInit {
     this.menuItems = ROUTES.filter(menuItem => menuItem);
       this.router.events.subscribe((event) => {
         this.isCollapsed = true;
+        location.reload();
      });
   }
 }
