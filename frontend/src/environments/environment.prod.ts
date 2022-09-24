@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  apiUrl: "http://chatbotwithclassification.caretta.net:9090"
+  apiUrl: "http://avatar.metatradeworld.io"
 };
