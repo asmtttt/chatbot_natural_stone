@@ -23,8 +23,8 @@ export class AvatarComponent implements OnInit {
   public transcript_arr = [];
   public confidence_arr = [];
   public languages = [
-    { ID: 1, lang: "Türkçe", langCode: "tr", voiceName: "Microsoft Tolga - Turkish (Turkey)" }, 
-    { ID: 2, lang: "İngilizce", langCode: "en-US", voiceName: "Google UK English Male" }
+    { ID: 1, lang: "Türkçe", langCode: "tr", voiceName: "tr-TR-Standard-D" },
+    { ID: 2, lang: "İngilizce", langCode: "en-US", voiceName: "en-US-Wavenet-C" }
   ];
 
   is_open_microphone: boolean = false;
@@ -42,7 +42,7 @@ export class AvatarComponent implements OnInit {
   webAvatar: any;
 
   constructor(private apiService: ApiService) {
-    
+
   }
 
   ngOnInit() {
@@ -69,7 +69,7 @@ export class AvatarComponent implements OnInit {
   }
 
   initAvatarSDK() {
-    SDK.applicationId = "6105974131766205942";
+    SDK.applicationId = "7137579724283114813";
     SDK.body = function () {
       var body = document.getElementById("img-div");
       return body;
@@ -77,14 +77,14 @@ export class AvatarComponent implements OnInit {
 
     this.avatarSDK = new SDKConnection();
     this.webAvatar = new WebAvatar();
-    
+
     this.webAvatar.version = 8.5;
     this.webAvatar.connection = this.avatarSDK;
-    this.webAvatar.avatar = "13974700";
-    this.webAvatar.voice = "dfki-ot-hsmm";
-    this.webAvatar.voiceMod = "default";
-    this.webAvatar.nativeVoice = true;
+    this.webAvatar.avatar = "12636026";
     this.webAvatar.nativeVoiceName = this.languages[0].voiceName;
+    this.webAvatar.nativeVoice = false;
+    this.webAvatar.voiceProvider = "google";
+    this.webAvatar.apiKey = "";
     this.webAvatar.width = "350";
 
     this.webAvatar.createBox();
@@ -174,7 +174,7 @@ export class AvatarComponent implements OnInit {
     this.is_open_microphone = false;
     setTimeout(() => 
       {
-        this.stop();
+      this.stop();
         this.speechToTextAnswer();},
       2000);
   }

@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- *  Copyright 2014-2021 Paphus Solutions Inc.
+ *  Copyright 2014-2022 Paphus Solutions Inc.
  *
  *  Licensed under the Eclipse Public License, Version 1.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -34,7 +34,7 @@
  * 
  * LiveChatConnection uses web sockets to provide access to live chat and chatrooms.
  * 
- * Version: 9.0.0-2022-01-27
+ * Version: 9.5.0-2022-10-24
  */
 
 /**
@@ -181,22 +181,6 @@
  }
  
  /**
-  * Allow our native speech API to use the third party Bing Speech API. You must
-  * create an account with Bing Speech to use their API, see
-  * https://azure.microsoft.com/en-us/try/cognitive-services
-  * 
-  * @static
-  */
- SDK.bingSpeech = false;
- SDK.initBingSpeech = function(instanceId, type) {
-     SDK.bingSpeech = true;
-     SDK.speechSynthesis = true;
-     SDK.speechInstance = instanceId;
-     SDK.speechType = type;
-     console.log("Initializing Bing speech.");
- }
- 
- /**
   * Allow our native speech API to use the third party QQ Speech API. 
   * 
   * @static
@@ -211,17 +195,25 @@
  }
  
  /**
-  * Allow our native speech API to use the third party Google Speech API.
-  *
+  * Allow our native speech API to use the third party Google Speech API. 
+  * 
   * @static
   */
  SDK.googleSpeech = false;
  SDK.initGoogleSpeech = function(instanceId, type) {
      SDK.googleSpeech = true;
-     SDK.speechSynthesis = true;
-     SDK.speechInstance = instanceId;
-     SDK.speechType = type;
      console.log("Initializing Google speech.");
+ }
+ 
+ /**
+  * Allow our native speech API to use the third party Microsoft Speech API. 
+  * 
+  * @static
+  */
+ SDK.bingSpeech = false;
+ SDK.initBingSpeech = function(instanceId, type) {
+     SDK.bingSpeech = true;
+     console.log("Initializing Bing speech.");
  }
  
  SDK.currentAudio = null;
@@ -268,7 +260,6 @@
   * Play the audio file given the url.
   */
  SDK.play = function(file, channelaudio, baseRoot) {
-     var enableShadowDOM = true;
      SDK.pauseSpeechRecognition();
      var audio = null;
      if (SDK.audio != null) {
@@ -369,20 +360,23 @@
   * For native voices a language code can be given.
   * If the browser supports TTS the native voice will be used by default.
   */
- SDK.tts = function(text, voice, native, lang, nativeVoice, mod, apiKey, apiEndpoint, baseRoot) {
+ SDK.tts = function(text, voice, provider, lang, nativeVoiceName, mod, apiKey, apiEndpoint, baseRoot) {
      try {
-         if ((native || (native == null && voice == null)) && SDK.speechSynthesis) {
+         if ((provider == true || provider == 'html5' || provider == 'responsive' || (provider == null && voice == null)) && SDK.speechSynthesis) {
              var utterance = null;
              if ('SpeechSynthesisUtterance' in window) {
                  utterance = new SpeechSynthesisUtterance(text);
              } else {
                  utterance = new SpeechSynthesisUtterance2(text);
              }
-             SDK.nativeTTS(utterance, lang, nativeVoice, apiKey, apiEndpoint, baseRoot);
+             SDK.nativeTTS(utterance, lang, nativeVoiceName, apiKey, apiEndpoint, baseRoot);
          } else {
              var url = SDK.rest + '/form-speak?&text=';
              url = url + encodeURIComponent(text);
-             if (voice != null) {
+             url = url + '&provider=' + provider;
+             if (nativeVoiceName != null && provider != null && provider != "botlibre") {
+                 url = url + '&voice=' + nativeVoiceName;
+             } else if (voice != null) {
                  url = url + '&voice=' + voice;
              }
              if (mod != null) {
@@ -442,69 +436,6 @@
  }
  
  /**
-  * Use the Bing Speech API.
-  */
- SDK.bingSpeechTTS = function(utterance, lang, voice, apiKey, apiEndpoint, baseRoot) {
-     
-     try {
-         if(utterance==null || utterance.text=="") {
-             return;
-         }
-         
-         SDK.pauseSpeechRecognition();
-         if (voice == null || voice == "") {
-             voice = "en-US, JessaRUS";
-         }
-         
-         var url = SDK.rest + '/form-speak?&text=';
-         url = url + encodeURIComponent(utterance.text);
- 
-         if (SDK.applicationId != null) {
-             url = url + '&application=' + SDK.applicationId;
-         }
-         if (SDK.speechInstance != null) {
-             url = url + '&instance=' + SDK.speechInstance;
-         }
-         if(SDK.speechType == "avatar") {
-             url = url + '&embeddedAvatar=true';
-         }
-         
-         if (apiKey != null) {
-             url = url + '&apiKey=' + apiKey;
-         }
-         if (apiEndpoint != null) {
-             url = url + '&apiEndpoint=' + apiEndpoint;
-         }
-         
-         url = url + '&voice=' + encodeURIComponent(voice);
-         
-         url = url + '&provider=bing';
-             
-         var request = new XMLHttpRequest();
-         var self = this;
-         request.onreadystatechange = function() {
-             if (request.readyState != 4) return;
-             if (request.status != 200) {
-                 if('bingApiKeyTr' in window) {
-                     SDK.showError("Invalid API Key or API Endpoint");
-                 }
-                 console.log('Error: Bing Speech web request failed: ' + request.statusText);
-             }
-             
-             var audio = SDK.play(SDK.url + "/" + request.responseText, null, baseRoot);
-             audio.onplay = utterance.onstart;
-             audio.onended = utterance.onend;
-         }
-         
-         request.open('GET', url, true);
-         request.send();
-         
-     } catch (error) {
-         console.log(error);
-     }
- }
- 
- /**
   * Use the QQ Speech API.
   */
  SDK.qqSpeechTTS = function(utterance, lang, voice, baseRoot) {
@@ -552,57 +483,6 @@
  }
  
  /**
-  * Use the Google Speech API.
-  */
- SDK.googleSpeechTTS = function(utterance, voice, apiKey, baseRoot) {
- 
-     try {
-         SDK.pauseSpeechRecognition();
- 
-         var url = SDK.rest + '/form-speak?&text=';
-         url = url + encodeURIComponent(utterance.text);
- 
-         if (SDK.applicationId != null) {
-             url = url + '&application=' + SDK.applicationId;
-         }
-         if (SDK.speechInstance != null) {
-             url = url + '&instance=' + SDK.speechInstance;
-         }
-         if(SDK.speechType == "avatar") {
-             url = url + '&embeddedAvatar=true';
-         }
-         if (voice != null) {
-             url = url + '&voice=' + voice;
-         }
-         if (apiKey != null) {
-             url = url + '&apiKey=' + apiKey;
-         }
- 
-         url = url + '&provider=google';
- 
-         var request = new XMLHttpRequest();
-         var self = this;
-         request.onreadystatechange = function() {
-             if (request.readyState != 4) return;
-             if (request.status != 200) {
-                 SDK.showError("Invalid API key or voice.");
-                 console.log('Error: Google Speech web request failed.');
-                 return;
-             }
-             var audio = SDK.play(SDK.url + "/" + request.responseText, null, baseRoot);
-             audio.onplay = utterance.onstart;
-             audio.onended = utterance.onend;
-         }
- 
-         request.open('GET', url, true);
-         request.send();
- 
-     } catch (error) {
-         console.log(error);
-     }
- }
- 
- /**
   * Speak the native utterance first setting the voice and language.
   */
  SDK.nativeTTS = function(utterance, lang, voice, apiKey, apiEndpoint, baseRoot) {
@@ -618,16 +498,9 @@
      if (SDK.responsiveVoice) {
          SDK.responsiveVoiceTTS(utterance, lang, voice);
          return;
-     } else if (SDK.bingSpeech) {
-         SDK.bingSpeechTTS(utterance, lang, voice, apiKey, apiEndpoint, baseRoot);
-         return;
      }
      else if (SDK.qqSpeech) {
          SDK.qqSpeechTTS(utterance, lang, voice, baseRoot);
-         return;
-     }
-     else if (SDK.googleSpeech){
-         SDK.googleSpeechTTS(utterance, voice, apiKey, baseRoot);
          return;
      }
      if (lang == null) {
@@ -1978,7 +1851,7 @@
      return false;
  }
  
-  /**
+     /**
      * Avatar browser dialog.
      */
      function AvatarBrowser(formInput, sdkUser) {
@@ -2579,7 +2452,7 @@
              html = html + "<link rel='stylesheet' href='" + this.buttoncss + "' type='text/css'>\n";
          }
          html = html + "<style>\n"
-                 + "." + this.prefix + "box { position:fixed;" + boxloc + ";z-index:152;margin:2px;display:none;" + border + " }\n"
+                 + "." + this.prefix + "box { box-shadow: 0px 8px 16px 0px rgb(0 0 0 / 50%); position:fixed;" + boxloc + ";z-index:152;margin:2px;display:none;" + border + " }\n"
                  + "." + this.prefix + "boxmenu { visibility:" + hidden + "; }\n" //margin-bottom:12px;
                  + (this.forceStyles ? "#" : ".") + "" + this.prefix + "boxbarmax { font-size:18px;margin:2px;padding:0px;text-decoration:none; }\n"
                  + "." + this.prefix + "boxbar {" + (this.icon ? "background-image: url(\"" + this.icon + "\") !important; background-position: center; background-repeat: no-repeat;" : "") + "display:none;position:fixed;" + boxbarloc + ";z-index:152;margin:0;padding:6px;" + buttonstyle + " }\n"
@@ -4132,6 +4005,8 @@
   * Shared method for updating an avatar image/video/audio from the chat response.
   */
  SDK.updateAvatar = function(responseMessage, speak, urlprefix, elementPrefix, channelaudio, afterFunction, nativeVoice, lang, voice, baseRoot) {
+     if(!responseMessage || typeof responseMessage != 'object') { return; }
+ 
      try {
          if (baseRoot == null) {
              baseRoot = document;
@@ -4908,7 +4783,7 @@
          }
          html = html +
              "<style>\n"
-                 + "." + this.prefix + "box { position:fixed;" + boxloc + ";z-index:1502;margin:2px;display:none;" + border + " }\n"
+                 + "." + this.prefix + "box { box-shadow: 0px 8px 16px 0px rgb(0 0 0 / 50%); position:fixed;" + boxloc + ";z-index:1502;margin:2px;display:none;" + border + " }\n"
                  + "." + this.prefix + "boxmenu { visibility:" + hidden + "; }\n"
                  + (this.forceStyles ? "#" : ".") + "" + this.prefix + "boxbarmax { font-size:18px;margin:2px;padding:0px;text-decoration:none; }\n"
                  + "." + this.prefix + "boxbar {" + (this.icon ? "background-image: url(\"" + this.icon + "\") !important; background-position: center; background-repeat: no-repeat;" : "") + "display:none;position:fixed;" + boxbarloc + ";z-index:152;margin:0;padding:6px;" + buttonstyle + " }\n"
@@ -6684,10 +6559,12 @@
          var backgroundstyle = "";
          var hidden = "hidden";
          var border = "";
+         var boxShadow = "";
          if ((this.background != null) && (!this.backgroundIfNotChrome || !(SDK.isChrome() || SDK.isFirefox()))) {
              backgroundstyle = " style='background-color:" + this.background + "'";
              hidden = "visible";
              border = "border:1px;border-style:solid;border-color:black;";
+             boxShadow = "box-shadow: 0px 8px 16px 0px rgb(0 0 0 / 50%);";
          } else {
              border = "border:1px;border-style:solid;border-color:transparent;";
          }
@@ -6739,7 +6616,7 @@
          var box = document.createElement('div');
          this.baseRoot = this.enableShadowDOM ? box.attachShadow({mode: 'open'}) : document;
          var html = "<style>\n"
-                 + "." + this.prefix + "avatarbox { line-height:0; overflow:hidden; position:relative;" + boxbarloc + ";z-index:152;margin:0 2px;" + border + " }\n"
+                 + "." + this.prefix + "avatarbox {" + boxShadow + "line-height:0; overflow:hidden; position:relative;" + boxbarloc + ";z-index:152;margin:0 2px;" + border + " }\n"
                  + "." + this.prefix + "avatarbox:hover { border:1px;border-style:solid;border-color:black; }\n"
                  + "." + this.prefix + "avatarbox ." + this.prefix + "avatarboxmenu { position: absolute; width: 100%; visibility:" + hidden + "; z-index: 5 }\n"
                  + "." + this.prefix + "avatarbox:hover ." + this.prefix + "avatarboxmenu { visibility:visible; }\n"
@@ -6772,7 +6649,6 @@
              box.innerHTML = html;
          }
          SDK.body().appendChild(box);
-         this.updateAvatar();
          var self = this;
          this.baseRoot.getElementById(this.prefix + "avatarboxclose").addEventListener("click", function() {
              self.closePlay();
@@ -6845,6 +6721,20 @@
          if (this.format != null) {
              config.format = this.format;
          }
+         config.voiceProvider = this.voiceProvider;
+         if (SDK.bingSpeech) {
+             config.voiceProvider = "microsoft";
+             config.speak = true;
+             this.nativeVoice = false;
+         } else if (SDK.googleSpeech) {
+             config.voiceProvider = "google";
+             config.speak = true;
+             this.nativeVoice = false;
+         } else if (SDK.qqSpeech) {
+             config.voiceProvider = "qq";
+             config.speak = true;
+             this.nativeVoice = false;
+         }
          if (this.nativeVoice && SDK.speechSynthesis) {
              config.speak = false;
          } else {
@@ -6855,6 +6745,9 @@
          config.emote = emote;
          config.action = action;
          config.pose = pose;
+         config.apiKey = this.apiKey;
+         config.apiEndpoint = this.apiEndpoint;
+         config.nativeVoiceName = this.nativeVoiceName;
          if (this.messages == null) {
              this.messages = [];
          }
@@ -6880,6 +6773,13 @@
          var message = this.messages[0];
          this.messages = this.messages.splice(1, this.messages.length);
          this.connection.avatarMessage(message, function(responseMessage) {
+             if (responseMessage.speech == null && message.voiceProvider) {
+                 if (message.voiceProvider == "microsoft") {
+                     SDK.showError("Invalid API Key, API Endpoint or voice.", "Error");
+                 } else if (message.voiceProvider == "google") {		
+                     SDK.showError("Invalid API key or voice.", "Error");
+                 }
+             }
              self.updateAvatar(responseMessage, function() {
                  setTimeout(function() {
                      self.processMessages(pause);
@@ -10329,10 +10229,14 @@
      this.avatar;
      this.speak;
      this.voice;
+     this.nativeVoiceName
      this.voiceMod;
      this.message;
      this.emote;
      this.action;
+     this.voiceProvider;
+     this.apiKey;
+     this.apiEndpoint;
      this.pose;
      this.hd = SDK.hd;
      this.format = SDK.format;
@@ -10346,6 +10250,12 @@
          if (this.emote != null) {
              xml = xml + (" emote=\"" + this.emote + "\"");
          }
+         if (this.apiKey != null) {
+             xml = xml + (" apiKey=\"" + this.apiKey + "\"");
+         }
+         if (this.apiEndpoint != null) {
+             xml = xml + (" apiEndpoint=\"" + this.apiEndpoint + "\"");
+         }
          if (this.action != null) {
              xml = xml + (" action=\"" + this.action + "\"");
          }
@@ -10354,6 +10264,12 @@
          }
          if (this.voice != null) {
              xml = xml + (" voice=\"" + this.voice + "\"");
+         }
+         if (this.voiceProvider != null) {
+             xml = xml + (" voiceProvider=\"" + this.voiceProvider + "\"");
+         }
+         if (this.nativeVoiceName != null) {
+             xml = xml + (" nativeVoiceName=\"" + this.nativeVoiceName + "\"");
          }
          if (this.voiceMod != null) {
              xml = xml + (" voiceMod=\"" + this.voiceMod + "\"");
