@@ -19,7 +19,7 @@ export class AvatarComponent implements OnInit {
   recognition = new webkitSpeechRecognition();
   isListening = false;
   public text = '';
-  public tempWords: any;
+  public tempWords: string = "";
   public transcript_arr = [];
   public confidence_arr = [];
   public languages = [
@@ -47,7 +47,7 @@ export class AvatarComponent implements OnInit {
 
   ngOnInit() {
     this.recognition.continuous = true;
-    this.recognition.interimResults = false;
+    this.recognition.interimResults = true;
     this.recognition.maxAlternatives = 1;
     this.recognition.lang = this.req.languageCode;
     console.log("mylang: ", this.recognition.lang);
