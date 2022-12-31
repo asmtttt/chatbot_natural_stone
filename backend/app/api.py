@@ -5,6 +5,8 @@ from pydantic import BaseModel
 from a2wsgi import ASGIMiddleware
 from .rule_base import *
 
+import pandas as pd
+
 app = FastAPI(title="Chatbot Natural Stone")
 
 # for ASGI Handler
@@ -28,6 +30,11 @@ async def read_root() -> dict:
 class get_review(BaseModel):
     review: str
 
+
+def insert_undetected_question(message):
+    dataset = pd.read_excel("backend/app/undetected_questions_datasets/undetected_questions.xlsx")
+    dataset.loc[len(dataset), 'questions'] = message
+    dataset.to_excel('backend/app/undetected_questions_datasets/undetected_questions.xlsx', index = False)
 
 @app.post("/answer", response_description="Answer of question.")
 async def get_answer(gr: get_review):
@@ -134,6 +141,7 @@ async def get_answer(gr: get_review):
                                 return all_answer
 
                             else:
+                                insert_undetected_question(message)
                                 answer = "Maalesef mesajınızı algılayamadım"
                                 all_answer["answer"] = answer
                                 print(all_answer)
@@ -227,6 +235,7 @@ async def get_answer(gr: get_review):
                                 return all_answer
 
                             else:
+                                insert_undetected_question(turkish_message)
                                 answer = "Maalesef mesajınızı algılayamadım"
                                 orginal_language_message = translator(answer, "tr", this_language_message)
                                 orginal_language_message = orginal_language_message.capitalize()

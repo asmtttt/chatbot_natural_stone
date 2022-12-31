@@ -10,7 +10,7 @@ import re
 
 import nltk
 from nltk.corpus import *
-nltk.download("all")
+#nltk.download("all")
 
 import jellyfish
 import pandas as pd
